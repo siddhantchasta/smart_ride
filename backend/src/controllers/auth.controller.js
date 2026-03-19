@@ -1,4 +1,5 @@
 const { registerUser } = require('../services/auth.service');
+const { loginUser } = require('../services/auth.service');
 
 const register = async (req, res) => {
   try {
@@ -12,4 +13,13 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+const login = async (req, res) => {
+  try {
+    const data = await loginUser(req.body);
+    res.json(data);
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+  }
+};
+
+module.exports = { register, login };
