@@ -6,6 +6,7 @@ const userRoutes = require('./routes/user.routes');
 const routesRoutes = require('./routes/routes.routes');
 const driverRoutes = require('./routes/driver.routes');
 const driverRouteRoutes = require('./routes/driverRoute.routes');
+const attendanceRoutes = require('./routes/attendance.routes');
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use('/api/user', userRoutes);
 app.use('/api/routes', routesRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/driver-routes', driverRouteRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 module.exports = app;
