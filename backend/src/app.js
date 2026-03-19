@@ -9,6 +9,7 @@ const driverRouteRoutes = require('./routes/driverRoute.routes');
 const attendanceRoutes = require('./routes/attendance.routes');
 const subscriptionRoutes = require('./routes/subscription.routes');
 const paymentRoutes = require('./routes/payment.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use('/api/driver-routes', driverRouteRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 module.exports = app;
