@@ -18,4 +18,39 @@ const getDrivers = async () => {
   return result.rows;
 };
 
-module.exports = { createDriver, getDrivers };
+const getDriverEarnings = async (driver_id) => {
+  const result = await pool.query(
+    `
+    SELECT COALESCE(SUM(p.amount), 0) AS total_earnings
+    FROM payments p
+    JOIN subscriptions s ON p.subscription_id = s.id
+    JOIN routes r ON s.route_id = r.id
+    JOIN driver_routes dr ON dr.route_id = r.id
+    WHERE dr.driver_id = $1
+    `,
+    [driver_id]
+  );
+
+  return {
+    total_earnings: parseInt(result.rows[0].total_earnings)
+  };
+};
+
+const getDriverPayments = async (driver_id) => {
+  const result = await pool.query(
+    `
+    SELECT p.*
+    FROM payments p
+    JOIN subscriptions s ON p.subscription_id = s.id
+    JOIN routes r ON s.route_id = r.id
+    JOIN driver_routes dr ON dr.route_id = r.id
+    WHERE dr.driver_id = $1
+    ORDER BY p.paid_at DESC
+    `,
+    [driver_id]
+  );
+
+  return result.rows;
+};
+
+module.exports = { createDriver, getDrivers, getDriverEarnings, getDriverPayments };
