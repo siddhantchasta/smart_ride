@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const routesRoutes = require('./routes/routes.routes');
 const driverRoutes = require('./routes/driver.routes');
+const driverRouteRoutes = require('./routes/driverRoute.routes');
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/routes', routesRoutes);
 app.use('/api/drivers', driverRoutes);
+app.use('/api/driver-routes', driverRouteRoutes);
 
 module.exports = app;
