@@ -63,11 +63,24 @@ const getAnalytics = async () => {
   };
 };
 
+const updateComplaintStatus = async (complaint_id, status) => {
+  const result = await pool.query(
+    `UPDATE complaints
+     SET status = $2
+     WHERE id = $1
+     RETURNING *`,
+    [complaint_id, status]
+  );
+
+  return result.rows[0];
+};
+
 module.exports = {
   getAllUsers,
   verifyDriver,
   createPlan,
   createComplaint,
   getComplaints,
-  getAnalytics
+  getAnalytics,
+  updateComplaintStatus,
 };

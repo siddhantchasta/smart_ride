@@ -4,7 +4,7 @@ const router = express.Router();
 const { fetchUsers } = require('../controllers/admin.controller');
 const { approveDriver } = require('../controllers/admin.controller');
 const { addPlan } = require('../controllers/admin.controller');
-const { addComplaint, fetchComplaints } = require('../controllers/admin.controller');
+const { addComplaint, fetchComplaints, updateComplaint } = require('../controllers/admin.controller');
 const { fetchAnalytics } = require('../controllers/admin.controller');
 
 const authMiddleware = require('../middlewares/auth.middleware');
@@ -42,6 +42,13 @@ router.get(
   authMiddleware,
   adminMiddleware,
   fetchAnalytics
+);
+
+router.put(
+  '/complaints/status',
+  authMiddleware,
+  adminMiddleware,
+  updateComplaint
 );
 
 module.exports = router;

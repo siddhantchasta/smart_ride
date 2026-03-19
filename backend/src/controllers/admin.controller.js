@@ -1,7 +1,7 @@
 const { getAllUsers } = require('../services/admin.service');
 const { verifyDriver } = require('../services/admin.service');
 const { createPlan } = require('../services/admin.service');
-const { createComplaint, getComplaints } = require('../services/admin.service');
+const { createComplaint, getComplaints, updateComplaintStatus } = require('../services/admin.service');
 const { getAnalytics } = require('../services/admin.service');
 
 const fetchUsers = async (req, res) => {
@@ -61,11 +61,24 @@ const fetchAnalytics = async (req, res) => {
   }
 };
 
+const updateComplaint = async (req, res) => {
+  try {
+    const { complaint_id, status } = req.body;
+
+    const data = await updateComplaintStatus(complaint_id, status);
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   fetchUsers,
   approveDriver,
   addPlan,
   addComplaint,
   fetchComplaints,
-  fetchAnalytics
+  fetchAnalytics,
+  updateComplaint
 };
