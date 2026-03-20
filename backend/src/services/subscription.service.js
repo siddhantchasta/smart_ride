@@ -26,6 +26,13 @@ const createSubscription = async (data) => {
 };
 
 const getUserSubscriptions = async (user_id) => {
+  await pool.query(
+    `UPDATE subscriptions
+     SET status = 'EXPIRED'
+     WHERE end_date < CURRENT_DATE
+     AND status = 'ACTIVE'`
+  );
+
   const result = await pool.query(
     `SELECT s.*, r.name as route_name, p.name as plan_name
      FROM subscriptions s
