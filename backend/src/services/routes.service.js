@@ -68,4 +68,36 @@ const findMatchingRoutes = async (user_id) => {
   return matchedRoutes;
 };
 
-module.exports = { createRoute, getAllRoutes, findMatchingRoutes };
+const assignDriverToUser = async (user_id) => {
+  // 1. Find matching routes
+  const matchedRoutes = await findMatchingRoutes(user_id);
+
+  if (matchedRoutes.length === 0) {
+    throw new Error("No matching routes found");
+  }
+
+  // 2. Pick first best route
+  const route = matchedRoutes[0];
+
+  // 3. Find driver for that route
+  const driverResult = await pool.query(
+    `SELECT d.*
+     FROM driver_routes dr
+     JOIN drivers d ON dr.driver_id = d.id
+     WHERE dr.route_id = $1`,
+    [route.id]
+  );
+
+  const driver = driverResult.rows[0];
+
+  if (!driver) {
+    throw new Error("No driver assigned to this route");
+  }
+
+  return {
+    route,
+    driver
+  };
+};
+
+module.exports = { createRoute, getAllRoutes, findMatchingRoutes, assignDriverToUser };

@@ -1,5 +1,8 @@
-const { createRoute, getAllRoutes } = require('../services/routes.service');
-const { findMatchingRoutes } = require('../services/routes.service');
+const { createRoute, 
+        getAllRoutes, 
+        findMatchingRoutes, 
+        assignDriverToUser
+       } = require('../services/routes.service');
 
 const addRoute = async (req, res) => {
   try {
@@ -31,4 +34,16 @@ const getMatchedRoutes = async (req, res) => {
   }
 };
 
-module.exports = { addRoute, fetchRoutes, getMatchedRoutes };
+const autoAssignDriver = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await assignDriverToUser(userId);
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { addRoute, fetchRoutes, getMatchedRoutes, autoAssignDriver };
