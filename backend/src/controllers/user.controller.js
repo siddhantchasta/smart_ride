@@ -3,7 +3,12 @@ const { addUserLocation, getUserLocation } = require('../services/user.service')
 const createLocation = async (req, res) => {
   try {
     const userId = req.user.id;
-    const data = await addUserLocation(userId, req.body);
+
+    const data = await addUserLocation({
+      user_id: userId,
+      ...req.body
+    });
+
     res.status(201).json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });

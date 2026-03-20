@@ -1,40 +1,39 @@
 const pool = require('../config/db');
+const { getCoordinates, calculateDistance } = require('./maps.service');
 
-const addUserLocation = async (userId, data) => {
-  const {
-    pickup_address,
-    pickup_lat,
-    pickup_lng,
-    drop_address,
-    drop_lat,
-    drop_lng,
-  } = data;
 
-  const existing = await pool.query(
-    `SELECT * FROM user_locations WHERE user_id = $1`,
-    [userId]
+const addUserLocation = async (data) => {
+  const { user_id, pickup_address, drop_address } = data;
+
+  // console.log("DEBUG:", data);
+  // console.log("PICKUP:", pickup_address);
+  // console.log("DROP:", drop_address);
+  const pickup = await getCoordinates(pickup_address);
+  const drop = await getCoordinates(drop_address);
+
+  const distance = await calculateDistance(
+    pickup.address,
+    drop.address
   );
 
-  if (existing.rows.length > 0) {
-    const result = await pool.query(
-      `UPDATE user_locations
-       SET pickup_address=$2, pickup_lat=$3, pickup_lng=$4,
-           drop_address=$5, drop_lat=$6, drop_lng=$7,
-           updated_at=NOW()
-       WHERE user_id=$1
-       RETURNING *`,
-      [userId, pickup_address, pickup_lat, pickup_lng, drop_address, drop_lat, drop_lng]
-    );
-
-    return result.rows[0];
-  }
+  console.log("DISTANCE:", distance);
 
   const result = await pool.query(
     `INSERT INTO user_locations 
-     (user_id, pickup_address, pickup_lat, pickup_lng, drop_address, drop_lat, drop_lng)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
+    (user_id, pickup_address, pickup_lat, pickup_lng,
+     drop_address, drop_lat, drop_lng, distance_km)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
      RETURNING *`,
-    [userId, pickup_address, pickup_lat, pickup_lng, drop_address, drop_lat, drop_lng]
+    [
+      user_id,
+      pickup.address,
+      pickup.lat,
+      pickup.lng,
+      drop.address,
+      drop.lat,
+      drop.lng,
+      distance.distance_value / 1000 // meters → km
+    ]
   );
 
   return result.rows[0];
