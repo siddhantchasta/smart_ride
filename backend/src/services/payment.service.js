@@ -2,6 +2,8 @@ const pool = require('../config/db');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
+const { sendPaymentEmail } = require('./email.service');
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -99,6 +101,17 @@ const savePayment = async (data) => {
       `invoice-${payment.id}`
     ]
   );
+
+  // 🔹 fetch user details
+  const userResult = await pool.query(
+    `SELECT name, email FROM users WHERE id = $1`,
+    [user_id]
+  );
+
+  const user = userResult.rows[0];
+
+  // 🔹 send email
+  await sendPaymentEmail(user.email, user.name, amount);
 
   return payment;
 };
