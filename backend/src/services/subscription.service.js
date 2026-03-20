@@ -16,8 +16,8 @@ const createSubscription = async (data) => {
 
   const result = await pool.query(
     `INSERT INTO subscriptions 
-    (user_id, route_id, plan_id, start_date, end_date)
-    VALUES ($1,$2,$3,$4,$5)
+     (user_id, route_id, plan_id, start_date, end_date, status)
+     VALUES ($1,$2,$3,$4,$5,'PENDING')
     RETURNING *`,
     [user_id, route_id, plan_id, start_date, end_date]
   );
@@ -31,7 +31,7 @@ const getUserSubscriptions = async (user_id) => {
      FROM subscriptions s
      JOIN routes r ON s.route_id = r.id
      JOIN plans p ON s.plan_id = p.id
-     WHERE s.user_id = $1`,
+     WHERE s.user_id = $1 AND s.status = 'ACTIVE'`,
     [user_id]
   );
 
