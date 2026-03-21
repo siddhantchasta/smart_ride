@@ -11,6 +11,7 @@ const subscriptionRoutes = require('./routes/subscription.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const adminRoutes = require('./routes/admin.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const planRoutes = require('./routes/plan.routes');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/routes', routesRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/driver-routes', driverRouteRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/plans', planRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin', adminRoutes);
