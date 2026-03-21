@@ -4,9 +4,11 @@ const validate = require('../middlewares/validate.middleware');
 
 const { addSubscription, fetchSubscriptions, fetchUserDetails } = require('../controllers/subscription.controller');
 const { createSubscriptionSchema } = require('../validators/subscription.validator');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 router.post(
   '/',
+  authMiddleware,
   validate(createSubscriptionSchema),
   addSubscription
 );

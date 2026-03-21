@@ -7,10 +7,11 @@ const {
     fetchInvoices, 
     createPaymentOrder, 
     verifyPaymentController } = require('../controllers/payment.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
-router.get('/:user_id', fetchPayments);
-router.get('/invoices/:user_id', fetchInvoices);
 router.post('/create-order', createPaymentOrder);
-router.post('/verify', verifyPaymentController);
+router.post('/verify', authMiddleware,verifyPaymentController);
+router.get('/invoices/:user_id', fetchInvoices);
+router.get('/user/:user_id', fetchPayments);
 
 module.exports = router;

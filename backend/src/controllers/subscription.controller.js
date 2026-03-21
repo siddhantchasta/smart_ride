@@ -5,10 +5,16 @@ const {
 
 const addSubscription = async (req, res) => {
   try {
-    const data = await createSubscription(req.body);
-    res.status(201).json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const data = {
+      ...req.body,
+      user_id: req.user.id,
+    };
+
+    const result = await createSubscription(data);
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

@@ -10,6 +10,7 @@ const createPaymentOrder = async (req, res) => {
 
     res.json(order);
   } catch (error) {
+    console.error("VERIFY ERROR FULL:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -39,6 +40,7 @@ const fetchInvoices = async (req, res) => {
     const data = await getInvoices(user_id);
     res.json(data);
   } catch (error) {
+    console.error("VERIFY ERROR FULL:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -49,16 +51,23 @@ const verifyPaymentController = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      user_id,
+      // user_id,
       subscription_id,
       amount
     } = req.body;
-
+    
+    const user_id = req.user.id;
+    console.log("REQ BODY:", req.body);
+    
     const isValid = verifyPayment(
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature
     );
+
+    console.log("ORDER:", razorpay_order_id);
+    console.log("PAYMENT:", razorpay_payment_id);
+    console.log("SIGNATURE:", razorpay_signature);
 
     if (!isValid) {
       return res.status(400).json({ error: "Invalid payment" });
@@ -79,6 +88,7 @@ const verifyPaymentController = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("VERIFY ERROR FULL:", error);
     res.status(500).json({ error: error.message });
   }
 };
