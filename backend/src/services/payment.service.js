@@ -56,7 +56,7 @@ const getInvoices = async (user_id) => {
 
 const createOrder = async (amount) => {
   const options = {
-    amount: amount * 100, // paise
+    amount: amount, // paise
     currency: 'INR',
     receipt: `receipt_${Date.now()}`
   };
@@ -116,13 +116,13 @@ const savePayment = async (data) => {
   return payment;
 };
 
-const activateSubscription = async (subscription_id) => {
-  await pool.query(
-    `UPDATE subscriptions 
-     SET status = 'ACTIVE'
-     WHERE id = $1`,
-    [subscription_id]
-  );
-};
+// const activateSubscription = async (subscription_id) => {
+//   await pool.query(
+//     `UPDATE subscriptions 
+//      SET status = 'ACTIVE'
+//      WHERE id = $1`,
+//     [subscription_id]
+//   );
+// };
 
-module.exports = { getPayments, getInvoices, createOrder, verifyPayment, savePayment, activateSubscription};
+module.exports = { getPayments, getInvoices, createOrder, verifyPayment, savePayment};

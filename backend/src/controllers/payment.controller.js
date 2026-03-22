@@ -1,16 +1,33 @@
 const { getPayments, getInvoices } = require('../services/payment.service');
 const { createOrder } = require('../services/payment.service');
-const { verifyPayment, savePayment, activateSubscription } = require('../services/payment.service');
+const { verifyPayment, savePayment } = require('../services/payment.service');
+const { assignDriver, markSubscriptionFailed } = require('../services/subscription.service');
+const { sendNotification } = require('../services/notification.service');
+const { getSubscriptionWithPlan } = require("../services/subscription.service");
 
 const createPaymentOrder = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const { subscription_id } = req.body;
 
+    if (!subscription_id) {
+      return res.status(400).json({ error: "Subscription ID required" });
+    }
+
+    const subscription = await getSubscriptionWithPlan(subscription_id);
+
+    if (!subscription) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    const amount = subscription.price * 100; // 🔥 paise
+    console.log("PRICE:", subscription.price);
+    console.log("FINAL AMOUNT:", subscription.price * 100);
     const order = await createOrder(amount);
 
     res.json(order);
+
   } catch (error) {
-    console.error("VERIFY ERROR FULL:", error);
+    console.error("CREATE ORDER ERROR:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -51,14 +68,14 @@ const verifyPaymentController = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      // user_id,
       subscription_id,
-      amount
     } = req.body;
-    
+
     const user_id = req.user.id;
+
     console.log("REQ BODY:", req.body);
-    
+
+    // 🔐 Verify signature
     const isValid = verifyPayment(
       razorpay_order_id,
       razorpay_payment_id,
@@ -70,21 +87,40 @@ const verifyPaymentController = async (req, res) => {
     console.log("SIGNATURE:", razorpay_signature);
 
     if (!isValid) {
+      await markSubscriptionFailed(subscription_id);
       return res.status(400).json({ error: "Invalid payment" });
     }
 
+    // 🔥 FETCH FROM DB USING SQL (NOT ORM)
+    const subscription = await getSubscriptionWithPlan(subscription_id);
+
+    if (!subscription) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    const amount = subscription.price;
+
+    // 💾 Save payment
     const payment = await savePayment({
       user_id,
       subscription_id,
       amount,
-      payment_id: razorpay_payment_id
+      payment_id: razorpay_payment_id,
     });
 
-    await activateSubscription(subscription_id);
+    // 🔔 Notify
+    await sendNotification({
+      user_id,
+      message: `Payment successful for ₹${amount}`,
+      type: "PAYMENT",
+    });
+
+    // 🚗 Assign driver
+    await assignDriver(subscription_id);
 
     res.json({
       message: "Payment successful & subscription activated",
-      payment
+      payment,
     });
 
   } catch (error) {
