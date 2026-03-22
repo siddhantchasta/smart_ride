@@ -8,6 +8,28 @@ const getAllUsers = async () => {
   return result.rows;
 };
 
+const getAvailableDriversByRoute = async (route_id) => {
+  const result = await pool.query(
+    `
+    SELECT d.id, d.name, d.phone
+    FROM driver_routes dr
+    JOIN drivers d ON dr.driver_id = d.id
+    WHERE dr.route_id = $1
+    AND d.is_active = true
+
+    -- 🔥 only available drivers
+    AND NOT EXISTS (
+      SELECT 1 FROM subscriptions s
+      WHERE s.driver_id = d.id
+      AND s.status = 'ACTIVE'
+    )
+    `,
+    [route_id]
+  );
+
+  return result.rows;
+};
+
 const verifyDriver = async (driver_id) => {
   const result = await pool.query(
     `UPDATE drivers 
@@ -88,14 +110,51 @@ const getAllSubscriptions = async () => {
 };
 
 const assignDriverManually = async (subscription_id, driver_id) => {
+  // 🔹 Check subscription
+  const sub = await pool.query(
+    `SELECT * FROM subscriptions WHERE id = $1`,
+    [subscription_id]
+  );
+
+  if (sub.rows.length === 0) {
+    throw new Error("Subscription not found");
+  }
+
+  const user_id = sub.rows[0].user_id;
+
+  // 🔹 Check driver
+  const driver = await pool.query(
+    `SELECT * FROM drivers WHERE id = $1`,
+    [driver_id]
+  );
+
+  if (driver.rows.length === 0) {
+    throw new Error("Driver not found");
+  }
+
+  // 🔥 Expire old ACTIVE
   await pool.query(
     `
     UPDATE subscriptions
-    SET driver_id = $1, status = 'ACTIVE'
+    SET status = 'EXPIRED'
+    WHERE user_id = $1 AND status = 'ACTIVE'
+    `,
+    [user_id]
+  );
+
+  // 🔹 Assign new
+  const result = await pool.query(
+    `
+    UPDATE subscriptions
+    SET driver_id = $1,
+        status = 'ACTIVE'
     WHERE id = $2
+    RETURNING *
     `,
     [driver_id, subscription_id]
   );
+
+  return result.rows[0];
 };
 
 const getStatsData = async () => {
@@ -126,6 +185,7 @@ const updateComplaintStatus = async (complaint_id, status) => {
 
 module.exports = {
   getAllUsers,
+  getAvailableDriversByRoute,
   verifyDriver,
   createPlan,
   createComplaint,

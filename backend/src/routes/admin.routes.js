@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { 
   fetchUsers,
+  getDriversByRouteController,
   approveDriver,
   addPlan,
   addComplaint,
@@ -21,6 +22,7 @@ router.get('/users', authMiddleware, adminMiddleware, fetchUsers);
 router.get('/subscriptions', fetchAllSubscriptions);
 router.post('/assign-driver', assignDriverAdmin);
 router.get('/stats', getStats);
+router.get("/drivers-by-route", getDriversByRouteController);
 
 router.post(
   '/drivers/verify',

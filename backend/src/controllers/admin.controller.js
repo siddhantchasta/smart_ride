@@ -1,5 +1,6 @@
 const {
   getAllUsers,
+  getAvailableDriversByRoute,
   verifyDriver,
   createPlan,
   createComplaint, 
@@ -17,6 +18,24 @@ const fetchUsers = async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const getDriversByRouteController = async (req, res) => {
+  try {
+    const { route_id } = req.query;
+
+    if (!route_id) {
+      return res.status(400).json({ error: "Route ID required" });
+    }
+
+    const drivers = await getAvailableDriversByRoute(route_id);
+
+    res.json(drivers);
+
+  } catch (err) {
+    console.error("GET DRIVERS ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -81,10 +100,15 @@ const assignDriverAdmin = async (req, res) => {
   try {
     const { subscription_id, driver_id } = req.body;
 
-    await assignDriverManually(subscription_id, driver_id);
+    const result = await assignDriverManually(
+      subscription_id,
+      driver_id
+    );
 
-    res.json({ message: "Driver assigned" });
+    res.json({ message: "Driver assigned", data: result });
+
   } catch (err) {
+    console.error("ADMIN ASSIGN ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -112,6 +136,7 @@ const updateComplaint = async (req, res) => {
 
 module.exports = {
   fetchUsers,
+  getDriversByRouteController,
   approveDriver,
   addPlan,
   addComplaint,
