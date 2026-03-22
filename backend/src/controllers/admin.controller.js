@@ -1,8 +1,15 @@
-const { getAllUsers } = require('../services/admin.service');
-const { verifyDriver } = require('../services/admin.service');
-const { createPlan } = require('../services/admin.service');
-const { createComplaint, getComplaints, updateComplaintStatus } = require('../services/admin.service');
-const { getAnalytics } = require('../services/admin.service');
+const {
+  getAllUsers,
+  verifyDriver,
+  createPlan,
+  createComplaint, 
+  getComplaints, 
+  updateComplaintStatus,
+  getAnalytics,
+  getAllSubscriptions,
+  assignDriverManually,
+  getStatsData
+} = require('../services/admin.service');
 
 const fetchUsers = async (req, res) => {
   try {
@@ -61,6 +68,36 @@ const fetchAnalytics = async (req, res) => {
   }
 };
 
+const fetchAllSubscriptions = async (req, res) => {
+  try {
+    const data = await getAllSubscriptions();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const assignDriverAdmin = async (req, res) => {
+  try {
+    const { subscription_id, driver_id } = req.body;
+
+    await assignDriverManually(subscription_id, driver_id);
+
+    res.json({ message: "Driver assigned" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getStats = async (req, res) => {
+  try {
+    const data = await getStatsData();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const updateComplaint = async (req, res) => {
   try {
     const { complaint_id, status } = req.body;
@@ -80,5 +117,8 @@ module.exports = {
   addComplaint,
   fetchComplaints,
   fetchAnalytics,
+  fetchAllSubscriptions,
+  assignDriverAdmin,
+  getStats,
   updateComplaint
 };

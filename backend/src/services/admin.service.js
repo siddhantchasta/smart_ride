@@ -63,6 +63,55 @@ const getAnalytics = async () => {
   };
 };
 
+const getAllSubscriptions = async () => {
+  const result = await pool.query(
+    `
+    SELECT 
+      s.id,
+      s.status,
+
+      u.name AS user_name,
+      r.name AS route_name,
+
+      d.name AS driver_name
+
+    FROM subscriptions s
+    JOIN users u ON s.user_id = u.id
+    JOIN routes r ON s.route_id = r.id
+    LEFT JOIN drivers d ON s.driver_id = d.id
+
+    ORDER BY s.created_at DESC
+    `
+  );
+
+  return result.rows;
+};
+
+const assignDriverManually = async (subscription_id, driver_id) => {
+  await pool.query(
+    `
+    UPDATE subscriptions
+    SET driver_id = $1, status = 'ACTIVE'
+    WHERE id = $2
+    `,
+    [driver_id, subscription_id]
+  );
+};
+
+const getStatsData = async () => {
+  const result = await pool.query(
+    `
+    SELECT 
+      COUNT(*) FILTER (WHERE status = 'ACTIVE') AS active,
+      COUNT(*) FILTER (WHERE status = 'WAITING') AS waiting,
+      COUNT(*) FILTER (WHERE status = 'FAILED') AS failed
+    FROM subscriptions
+    `
+  );
+
+  return result.rows[0];
+};
+
 const updateComplaintStatus = async (complaint_id, status) => {
   const result = await pool.query(
     `UPDATE complaints
@@ -82,5 +131,8 @@ module.exports = {
   createComplaint,
   getComplaints,
   getAnalytics,
+  getAllSubscriptions,
+  assignDriverManually,
+  getStatsData,
   updateComplaintStatus,
 };

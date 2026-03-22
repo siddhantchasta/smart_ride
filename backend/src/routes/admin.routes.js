@@ -1,16 +1,26 @@
 const express = require('express');
 const router = express.Router();
 
-const { fetchUsers } = require('../controllers/admin.controller');
-const { approveDriver } = require('../controllers/admin.controller');
-const { addPlan } = require('../controllers/admin.controller');
-const { addComplaint, fetchComplaints, updateComplaint } = require('../controllers/admin.controller');
-const { fetchAnalytics } = require('../controllers/admin.controller');
+const { 
+  fetchUsers,
+  approveDriver,
+  addPlan,
+  addComplaint,
+  fetchComplaints,
+  updateComplaint,
+  fetchAnalytics,
+  fetchAllSubscriptions,
+  assignDriverAdmin,
+  getStats  
+} = require('../controllers/admin.controller');
 
 const authMiddleware = require('../middlewares/auth.middleware');
 const adminMiddleware = require('../middlewares/admin.middleware');
 
 router.get('/users', authMiddleware, adminMiddleware, fetchUsers);
+router.get('/subscriptions', fetchAllSubscriptions);
+router.post('/assign-driver', assignDriverAdmin);
+router.get('/stats', getStats);
 
 router.post(
   '/drivers/verify',
