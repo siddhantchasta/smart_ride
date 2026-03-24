@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { getCoordinates, calculateDistance } = require("./maps.service");
 
 const createRoute = async (data) => {
   const {
@@ -10,12 +11,54 @@ const createRoute = async (data) => {
     total_seats,
   } = data;
 
+  // Get coordinates
+  const start = await getCoordinates(start_location);
+  const end = await getCoordinates(end_location);
+
+  // Calculate distance
+  const distance = await calculateDistance(
+    start.address,
+    end.address
+  );
+
+  const distance_km = distance.distance_value / 1000;
+
+  // Insert route
   const result = await pool.query(
-    `INSERT INTO routes 
-    (name, start_location, end_location, start_time, end_time, total_seats, available_seats)
-    VALUES ($1,$2,$3,$4,$5,$6,$6)
-    RETURNING *`,
-    [name, start_location, end_location, start_time, end_time, total_seats]
+    `
+    INSERT INTO routes (
+      name,
+      start_location,
+      end_location,
+      start_time,
+      end_time,
+      total_seats,
+      available_seats,
+      is_active,
+      start_lat,
+      start_lng,
+      end_lat,
+      end_lng,
+      distance_km
+    )
+    VALUES (
+      $1,$2,$3,$4,$5,$6,$6,true,$7,$8,$9,$10,$11
+    )
+    RETURNING *
+    `,
+    [
+      name,
+      start.address,
+      end.address,
+      start_time,
+      end_time,
+      total_seats,
+      start.lat,
+      start.lng,
+      end.lat,
+      end.lng,
+      distance_km,
+    ]
   );
 
   return result.rows[0];
