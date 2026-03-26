@@ -3,13 +3,16 @@ const {
   getAvailableDriversByRoute,
   verifyDriver,
   createPlan,
-  createComplaint, 
-  getComplaints, 
-  updateComplaintStatus,
   getAnalytics,
   getAllSubscriptions,
   assignDriverManually,
-  getStatsData
+  getStatsData, 
+  createQuery, 
+  getQueries,
+  getUserQueries, 
+  resolveQuery, 
+  createRouteRequest, 
+  getRouteRequests
 } = require('../services/admin.service');
 
 const fetchUsers = async (req, res) => {
@@ -60,24 +63,6 @@ const addPlan = async (req, res) => {
   }
 };
 
-const addComplaint = async (req, res) => {
-  try {
-    const data = await createComplaint(req.body);
-    res.status(201).json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const fetchComplaints = async (req, res) => {
-  try {
-    const data = await getComplaints();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 const fetchAnalytics = async (req, res) => {
   try {
     const data = await getAnalytics();
@@ -122,15 +107,75 @@ const getStats = async (req, res) => {
   }
 };
 
-const updateComplaint = async (req, res) => {
+const addQuery = async (req, res) => {
   try {
-    const { complaint_id, status } = req.body;
+    const user_id = req.user.id;
+    const { message } = req.body;
 
-    const data = await updateComplaintStatus(complaint_id, status);
+    const data = await createQuery({ user_id, message });
+
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const fetchQueries = async (req, res) => {
+  try {
+    const data = await getQueries();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const fetchUserQueries = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+
+    const data = await getUserQueries(user_id);
 
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const markQueryResolved = async (req, res) => {
+  try {
+    const { query_id } = req.body;
+
+    const data = await resolveQuery(query_id);
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const addRouteRequest = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const { pickup, drop } = req.body;
+
+    const data = await createRouteRequest({
+      user_id,
+      pickup,
+      drop,
+    });
+
+    res.status(201).json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const fetchRouteRequests = async (req, res) => {
+  try {
+    const data = await getRouteRequests();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
@@ -139,11 +184,14 @@ module.exports = {
   getDriversByRouteController,
   approveDriver,
   addPlan,
-  addComplaint,
-  fetchComplaints,
   fetchAnalytics,
   fetchAllSubscriptions,
   assignDriverAdmin,
-  getStats,
-  updateComplaint
+  getStats, 
+  addQuery, 
+  fetchQueries,
+  fetchUserQueries,
+  markQueryResolved, 
+  addRouteRequest, 
+  fetchRouteRequests
 };

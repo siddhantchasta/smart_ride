@@ -6,13 +6,16 @@ const {
   getDriversByRouteController,
   approveDriver,
   addPlan,
-  addComplaint,
-  fetchComplaints,
-  updateComplaint,
   fetchAnalytics,
   fetchAllSubscriptions,
   assignDriverAdmin,
-  getStats  
+  getStats,
+  addQuery, 
+  fetchQueries, 
+  fetchUserQueries,
+  markQueryResolved, 
+  addRouteRequest, 
+  fetchRouteRequests
 } = require('../controllers/admin.controller');
 
 const authMiddleware = require('../middlewares/auth.middleware');
@@ -38,29 +41,18 @@ router.post(
   addPlan
 );
 
-// User creates complaint
-router.post('/complaints', authMiddleware, addComplaint);
-
-// Admin views all complaints
-router.get(
-  '/complaints',
-  authMiddleware,
-  adminMiddleware,
-  fetchComplaints
-);
+router.post("/query", authMiddleware, addQuery);
+router.get("/queries", fetchQueries);             
+router.get("/my-queries", authMiddleware, fetchUserQueries);
+router.post("/resolve-query", markQueryResolved);
+router.post("/route-request", authMiddleware, addRouteRequest);
+router.get("/route-requests", fetchRouteRequests);
 
 router.get(
   '/analytics',
   authMiddleware,
   adminMiddleware,
   fetchAnalytics
-);
-
-router.put(
-  '/complaints/status',
-  authMiddleware,
-  adminMiddleware,
-  updateComplaint
 );
 
 module.exports = router;

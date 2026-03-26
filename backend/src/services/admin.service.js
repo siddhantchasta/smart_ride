@@ -55,22 +55,49 @@ const createPlan = async (data) => {
   return result.rows[0];
 };
 
-const createComplaint = async (data) => {
-  const { user_id, driver_id, message } = data;
-
+const createQuery = async ({ user_id, message }) => {
   const result = await pool.query(
-    `INSERT INTO complaints (user_id, driver_id, message)
-     VALUES ($1,$2,$3)
+    `INSERT INTO queries (user_id, message)
+     VALUES ($1, $2)
      RETURNING *`,
-    [user_id, driver_id, message]
+    [user_id, message]
   );
 
   return result.rows[0];
 };
 
-const getComplaints = async () => {
-  const result = await pool.query(`SELECT * FROM complaints`);
+const getQueries = async () => {
+  const result = await pool.query(
+    `SELECT q.*, u.email AS user_email
+     FROM queries q
+     JOIN users u ON q.user_id = u.id
+     ORDER BY q.created_at DESC`
+  );
+
   return result.rows;
+};
+
+const getUserQueries = async (user_id) => {
+  const result = await pool.query(
+    `SELECT * FROM queries
+     WHERE user_id = $1
+     ORDER BY created_at DESC`,
+    [user_id]
+  );
+
+  return result.rows;
+};
+
+const resolveQuery = async (query_id) => {
+  const result = await pool.query(
+    `UPDATE queries
+     SET status = 'RESOLVED'
+     WHERE id = $1
+     RETURNING *`,
+    [query_id]
+  );
+
+  return result.rows[0];
 };
 
 const getAnalytics = async () => {
@@ -171,16 +198,26 @@ const getStatsData = async () => {
   return result.rows[0];
 };
 
-const updateComplaintStatus = async (complaint_id, status) => {
+const createRouteRequest = async ({ user_id, pickup, drop }) => {
   const result = await pool.query(
-    `UPDATE complaints
-     SET status = $2
-     WHERE id = $1
+    `INSERT INTO route_requests (user_id, pickup, drop)
+     VALUES ($1,$2,$3)
      RETURNING *`,
-    [complaint_id, status]
+    [user_id, pickup, drop]
   );
 
   return result.rows[0];
+};
+
+const getRouteRequests = async () => {
+  const result = await pool.query(
+    `SELECT rr.*, u.email
+     FROM route_requests rr
+     JOIN users u ON rr.user_id = u.id
+     ORDER BY rr.created_at DESC`
+  );
+
+  return result.rows;
 };
 
 module.exports = {
@@ -188,11 +225,14 @@ module.exports = {
   getAvailableDriversByRoute,
   verifyDriver,
   createPlan,
-  createComplaint,
-  getComplaints,
   getAnalytics,
   getAllSubscriptions,
   assignDriverManually,
   getStatsData,
-  updateComplaintStatus,
+  createQuery, 
+  getQueries, 
+  getUserQueries,
+  resolveQuery, 
+  createRouteRequest, 
+  getRouteRequests
 };
