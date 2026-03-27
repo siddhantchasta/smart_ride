@@ -21,8 +21,6 @@ const {
 const authMiddleware = require('../middlewares/auth.middleware');
 const adminMiddleware = require('../middlewares/admin.middleware');
 
-router.use(authMiddleware, adminMiddleware);
-
 router.get('/users', authMiddleware, adminMiddleware, fetchUsers);
 router.get('/subscriptions', fetchAllSubscriptions);
 router.post('/assign-driver', assignDriverAdmin);
