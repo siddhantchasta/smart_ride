@@ -79,7 +79,7 @@ const verifyPayment = (order_id, payment_id, signature) => {
 const savePayment = async (data) => {
   const { user_id, subscription_id, amount, payment_id } = data;
 
-  // ✅ 1. Save payment
+  // save payment
   const paymentResult = await pool.query(
     `INSERT INTO payments 
     (user_id, subscription_id, amount, payment_status, transaction_id, paid_at)
@@ -90,7 +90,8 @@ const savePayment = async (data) => {
 
   const payment = paymentResult.rows[0];
 
-  // ✅ 2. Create invoice (MOVED HERE)
+  // Create invoice (MOVED HERE)
+  const invoiceUrl = `http://localhost:3000/api/invoice/${payment.id}`;
   await pool.query(
     `INSERT INTO invoices (user_id, subscription_id, amount, invoice_url)
      VALUES ($1,$2,$3,$4)`,
@@ -98,7 +99,7 @@ const savePayment = async (data) => {
       user_id,
       subscription_id,
       amount,
-      `invoice-${payment.id}`
+      invoiceUrl
     ]
   );
 

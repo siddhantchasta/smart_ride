@@ -27,6 +27,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use("/api/invoice", require("./routes/invoice.routes"));
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 

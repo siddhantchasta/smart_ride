@@ -121,12 +121,13 @@ const getAllSubscriptions = async () => {
 
       u.name AS user_name,
       r.name AS route_name,
-
+      p.name AS plan_name
       d.name AS driver_name
 
     FROM subscriptions s
     JOIN users u ON s.user_id = u.id
     JOIN routes r ON s.route_id = r.id
+    JOIN plans p ON s.plan_id = p.id
     LEFT JOIN drivers d ON s.driver_id = d.id
 
     ORDER BY s.created_at DESC

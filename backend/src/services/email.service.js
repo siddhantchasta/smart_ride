@@ -8,7 +8,7 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-const sendPaymentEmail = async (to, name, amount) => {
+const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -30,6 +30,21 @@ const sendPaymentEmail = async (to, name, amount) => {
                 <div style="background:#f1f3f5; padding:15px; border-radius:8px; margin:15px 0;">
                     <p style="margin:0;"><b>Amount:</b> ₹${amount}</p>
                     <p style="margin:0;"><b>Status:</b> Successful</p>
+                </div>
+
+                <div style="text-align:center; margin-top:20px;">
+                  <a href="${invoiceUrl}" 
+                    style="
+                      background:#000;
+                      color:#fff;
+                      padding:10px 20px;
+                      text-decoration:none;
+                      border-radius:6px;
+                      display:inline-block;
+                      font-size:14px;
+                    ">
+                    Download Invoice
+                  </a>
                 </div>
 
                 <p>Your subscription is now active. 🎉</p>
