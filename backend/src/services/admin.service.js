@@ -121,7 +121,7 @@ const getAllSubscriptions = async () => {
 
       u.name AS user_name,
       r.name AS route_name,
-      p.name AS plan_name
+      p.name AS plan_name,
       d.name AS driver_name
 
     FROM subscriptions s
