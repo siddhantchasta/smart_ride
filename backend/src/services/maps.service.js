@@ -6,8 +6,9 @@ const getCoordinates = async (address) => {
       'https://maps.googleapis.com/maps/api/geocode/json',
       {
         params: {
-          address: address,
-          key: process.env.GOOGLE_MAPS_API_KEY
+          address: `${address}, India`,
+          key: process.env.GOOGLE_MAPS_API_KEY,
+          region: "IN"
         }
       }
     );
@@ -39,8 +40,8 @@ const calculateDistance = async (origin, destination) => {
       'https://maps.googleapis.com/maps/api/distancematrix/json',
       {
         params: {
-          origins: origin,
-          destinations: destination,
+          origins: `${origin}, India`,       
+          destinations: `${destination}, India`,
           key: process.env.GOOGLE_MAPS_API_KEY
         }
       }
@@ -55,6 +56,10 @@ const calculateDistance = async (origin, destination) => {
     }
 
     const element = data.rows[0].elements[0];
+    
+    if (!element || element.status !== "OK") {
+      throw new Error("No valid route found");
+    }
 
     return {
       distance_text: element.distance.text,
