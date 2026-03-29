@@ -121,7 +121,7 @@ const getInvoiceHTML = async (req, res) => {
         <div class="divider"></div>
 
         <p style="text-align:center; color:#666;">
-          Thank you for choosing SmartRide 🚗
+          Thank you for choosing SmartRide
         </p>
 
         <a href="#" onclick="window.print()" class="btn">Download / Print</a>

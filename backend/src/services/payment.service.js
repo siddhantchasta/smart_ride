@@ -77,7 +77,7 @@ const verifyPayment = (order_id, payment_id, signature) => {
 };
 
 const savePayment = async (data) => {
-  const { user_id, subscription_id, amount, payment_id } = data;
+  const { user_id, subscription_id, amount, payment_id, invoice_id } = data;
 
   // save payment
   const paymentResult = await pool.query(
@@ -90,20 +90,23 @@ const savePayment = async (data) => {
 
   const payment = paymentResult.rows[0];
 
-  // Create invoice (MOVED HERE)
-  const invoiceUrl = `http://localhost:3000/api/invoice/${payment.id}`;
-  await pool.query(
-    `INSERT INTO invoices (user_id, subscription_id, amount, invoice_url)
-     VALUES ($1,$2,$3,$4)`,
+  const baseUrl = process.env.BASE_URL;
+
+  const invoiceResult = await pool.query(
+    `INSERT INTO invoices (user_id, subscription_id, amount)
+     VALUES ($1,$2,$3)
+     RETURNING *`,
     [
       user_id,
       subscription_id,
       amount,
-      invoiceUrl
     ]
   );
 
-  // 🔹 fetch user details
+  const invoice = invoiceResult.rows[0];
+  const invoiceUrl = `${baseUrl}/invoice/${invoice.id}`;
+
+  // fetch user details
   const userResult = await pool.query(
     `SELECT name, email FROM users WHERE id = $1`,
     [user_id]
@@ -112,7 +115,7 @@ const savePayment = async (data) => {
   const user = userResult.rows[0];
 
   // 🔹 send email
-  await sendPaymentEmail(user.email, user.name, amount);
+  await sendPaymentEmail(user.email, user.name, amount, invoiceUrl);
 
   return payment;
 };
