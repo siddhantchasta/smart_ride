@@ -1,9 +1,9 @@
 const pool = require('../config/db');
 
 const createSubscription = async (data) => {
-  const { user_id, route_id, plan_id, start_date, end_date } = data;
+  const { user_id, route_id, plan_id, start_date, end_date, start_time, end_time } = data;
 
-  // 🔒 CHECK existing active subscription
+  // CHECK existing active subscription
   const existing = await pool.query(
     `SELECT * FROM subscriptions 
      WHERE user_id = $1 AND status = 'ACTIVE'`,
@@ -16,10 +16,10 @@ const createSubscription = async (data) => {
 
   const result = await pool.query(
     `INSERT INTO subscriptions 
-     (user_id, route_id, plan_id, start_date, end_date, status)
-     VALUES ($1,$2,$3,$4,$5,'WATING')
+     (user_id, route_id, plan_id, start_date, end_date, status, start_time, end_time)
+     VALUES ($1,$2,$3,$4,$5,'WATING',$6,$7)
     RETURNING *`,
-    [user_id, route_id, plan_id, start_date, end_date]
+    [user_id, route_id, plan_id, start_date, end_date, start_time, end_time]
   );
 
   return result.rows[0];

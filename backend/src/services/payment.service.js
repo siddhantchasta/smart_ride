@@ -114,7 +114,7 @@ const savePayment = async (data) => {
 
   const user = userResult.rows[0];
 
-  // 🔹 send email
+  // send email
   await sendPaymentEmail(user.email, user.name, amount, invoiceUrl);
 
   return payment;
