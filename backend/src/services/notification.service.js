@@ -18,7 +18,9 @@ const sendNotification = async (data) => {
 
 const getNotifications = async (user_id) => {
   const result = await pool.query(
-    `SELECT * FROM notifications WHERE user_id = $1`,
+    `SELECT * FROM notifications 
+     WHERE user_id = $1 
+     ORDER BY created_at DESC`,
     [user_id]
   );
 
