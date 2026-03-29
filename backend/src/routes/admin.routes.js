@@ -4,6 +4,7 @@ const router = express.Router();
 const { 
   fetchUsers,
   getDriversByRouteController,
+  createDriverAdmin,
   approveDriver,
   addPlan,
   fetchAnalytics,
@@ -15,8 +16,12 @@ const {
   fetchUserQueries,
   markQueryResolved, 
   addRouteRequest, 
+  approveRoute,
   fetchRouteRequests
 } = require('../controllers/admin.controller');
+
+const { assignRoute } = require('../controllers/driverRoute.controller');
+const { createVehicle } = require("../controllers/vehicle.controller");
 
 const authMiddleware = require('../middlewares/auth.middleware');
 const adminMiddleware = require('../middlewares/admin.middleware');
@@ -28,11 +33,27 @@ router.get('/stats', getStats);
 router.get("/drivers-by-route", getDriversByRouteController);
 
 router.post(
+  '/create-driver', 
+  authMiddleware, 
+  adminMiddleware, 
+  createDriverAdmin
+);
+
+router.post(
+  "/assign-driver-route",
+  authMiddleware,
+  adminMiddleware,
+  assignRoute
+);
+
+router.post(
   '/drivers/verify',
   authMiddleware,
   adminMiddleware,
   approveDriver
 );
+
+router.post("/create-vehicle", createVehicle);
 
 router.post(
   '/plans',
@@ -46,6 +67,7 @@ router.get("/queries", fetchQueries);
 router.get("/my-queries", authMiddleware, fetchUserQueries);
 router.post("/resolve-query", markQueryResolved);
 router.post("/route-request", authMiddleware, addRouteRequest);
+router.post("/approve-route", authMiddleware, adminMiddleware, approveRoute);
 router.get("/route-requests", fetchRouteRequests);
 
 router.get(

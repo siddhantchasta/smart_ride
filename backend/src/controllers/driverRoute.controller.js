@@ -6,7 +6,7 @@ const {
 const assignRoute = async (req, res) => {
   try {
     const { driver_id, route_id } = req.body;
-
+    
     const data = await assignDriverToRoute(driver_id, route_id);
 
     res.status(201).json(data);

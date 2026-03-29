@@ -2,7 +2,7 @@ const pool = require('../config/db');
 
 const assignDriverToRoute = async (driver_id, route_id) => {
   const result = await pool.query(
-    `INSERT INTO driver_routes (driver_id, route_id, assigned_at)
+    `INSERT INTO driver_routes (driver_id, route_id, assigned_date)
      VALUES ($1, $2, NOW())
      RETURNING *`,
     [driver_id, route_id]

@@ -17,7 +17,7 @@ const getAvailableDriversByRoute = async (route_id) => {
     WHERE dr.route_id = $1
     AND d.is_active = true
 
-    -- 🔥 only available drivers
+    -- only available drivers
     AND NOT EXISTS (
       SELECT 1 FROM subscriptions s
       WHERE s.driver_id = d.id
@@ -118,6 +118,9 @@ const getAllSubscriptions = async () => {
     SELECT 
       s.id,
       s.status,
+      s.route_id,
+      s.start_time,
+      s.end_time,
 
       u.name AS user_name,
       r.name AS route_name,
@@ -138,7 +141,7 @@ const getAllSubscriptions = async () => {
 };
 
 const assignDriverManually = async (subscription_id, driver_id) => {
-  // 🔹 Check subscription
+  // Check subscription
   const sub = await pool.query(
     `SELECT * FROM subscriptions WHERE id = $1`,
     [subscription_id]
@@ -150,7 +153,7 @@ const assignDriverManually = async (subscription_id, driver_id) => {
 
   const user_id = sub.rows[0].user_id;
 
-  // 🔹 Check driver
+  // Check driver
   const driver = await pool.query(
     `SELECT * FROM drivers WHERE id = $1`,
     [driver_id]
@@ -160,7 +163,7 @@ const assignDriverManually = async (subscription_id, driver_id) => {
     throw new Error("Driver not found");
   }
 
-  // 🔥 Expire old ACTIVE
+  // Expire old ACTIVE
   await pool.query(
     `
     UPDATE subscriptions
@@ -170,7 +173,7 @@ const assignDriverManually = async (subscription_id, driver_id) => {
     [user_id]
   );
 
-  // 🔹 Assign new
+  // Assign new
   const result = await pool.query(
     `
     UPDATE subscriptions
