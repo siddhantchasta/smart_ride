@@ -17,7 +17,7 @@ const createSubscription = async (data) => {
   const result = await pool.query(
     `INSERT INTO subscriptions 
      (user_id, route_id, plan_id, start_date, end_date, status, start_time, end_time)
-     VALUES ($1,$2,$3,$4,$5,'WATING',$6,$7)
+     VALUES ($1,$2,$3,$4,$5,'WAITING',$6,$7)
     RETURNING *`,
     [user_id, route_id, plan_id, start_date, end_date, start_time, end_time]
   );
@@ -123,6 +123,8 @@ const getUserSubscriptionDetails = async (user_id) => {
     SELECT 
       s.id AS subscription_id,
       s.status,
+      s.start_time,
+      s.end_time,
       r.name AS route_name,
 
       d.name AS driver_name,

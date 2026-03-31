@@ -19,6 +19,8 @@ const { createDriver } = require('../services/driver.service');
 
 const { sendNotification } = require('../services/notification.service');
 
+const { getCoordinates, calculateDistance } = require("../services/maps.service");
+
 const db = require("../config/db");
 
 const fetchUsers = async (req, res) => {
@@ -258,11 +260,11 @@ const approveRoute = async (req, res) => {
     // 🔥 STEP 2: INSERT NEW ROUTE (only if not exists)
     const startCoords = await getCoordinates(r.pickup);
     const endCoords = await getCoordinates(r.drop);
-    const distance = await getDistance(r.pickup, r.drop);
+    const distance = await calculateDistance(r.pickup, r.drop);
 
     const newRoute = await db.query(
       `INSERT INTO routes 
-      (name, start_location, end_location, total_seats, available_seats, is_active)
+      (name, start_location, end_location, total_seats, available_seats, is_active, start_lat, start_lng, end_lat, end_lng, distance_km)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *`,
       [
@@ -276,7 +278,7 @@ const approveRoute = async (req, res) => {
         startCoords.lng,
         endCoords.lat,
         endCoords.lng,
-        distance.distance_value
+        distance.distance_value / 1000
       ]
     );
 

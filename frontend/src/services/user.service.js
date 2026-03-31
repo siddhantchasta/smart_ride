@@ -5,3 +5,5 @@ export const saveLocation = (data) =>
 
 export const getLocation = () =>
   API.get("/user/location");
+
+export const getMe = () => API.get("/user/me");
