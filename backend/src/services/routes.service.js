@@ -73,7 +73,7 @@ const getAllRoutes = async () => {
 };
 
 const findMatchingRoutes = async (user_id) => {
-  // 1. Get user location
+  // Get user location
   const userResult = await pool.query(
     `SELECT * FROM user_locations WHERE user_id = $1`,
     [user_id]
@@ -83,7 +83,7 @@ const findMatchingRoutes = async (user_id) => {
 
   if (!user) throw new Error("User location not found");
 
-  // 2. Get all routes
+  // Get all routes
   const routesResult = await pool.query(`SELECT * FROM routes`);
 
   const routes = routesResult.rows;
@@ -112,17 +112,17 @@ const findMatchingRoutes = async (user_id) => {
 };
 
 const assignDriverToUser = async (user_id) => {
-  // 1. Find matching routes
+  // Find matching routes
   const matchedRoutes = await findMatchingRoutes(user_id);
 
   if (matchedRoutes.length === 0) {
     throw new Error("No matching routes found");
   }
 
-  // 2. Pick first best route
+  // Pick first best route
   const route = matchedRoutes[0];
 
-  // 3. Find driver for that route
+  // Find driver for that route
   const driverResult = await pool.query(
     `SELECT d.*
      FROM driver_routes dr

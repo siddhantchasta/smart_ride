@@ -12,7 +12,7 @@ const addSubscription = async (req, res) => {
 
     const result = await createSubscription(data);
 
-    res.json(result);
+    return res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

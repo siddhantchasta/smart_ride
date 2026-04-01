@@ -230,7 +230,7 @@ const approveRoute = async (req, res) => {
 
     const r = request.rows[0];
 
-    // STEP 1: CHECK IF ROUTE ALREADY EXISTS
+    // CHECK IF ROUTE ALREADY EXISTS
     const existingRoute = await db.query(
       `SELECT * FROM routes 
        WHERE LOWER(start_location) = LOWER($1) 
@@ -239,7 +239,7 @@ const approveRoute = async (req, res) => {
     );
 
     if (existingRoute.rows.length > 0) {
-      // Route already exists → just approve request
+      // Route already exists : just approve request
       await db.query(
         "UPDATE route_requests SET status = 'APPROVED' WHERE id = $1",
         [request_id]
@@ -257,7 +257,7 @@ const approveRoute = async (req, res) => {
       });
     }
 
-    // 🔥 STEP 2: INSERT NEW ROUTE (only if not exists)
+    // INSERT NEW ROUTE (only if not exists)
     const startCoords = await getCoordinates(r.pickup);
     const endCoords = await getCoordinates(r.drop);
     const distance = await calculateDistance(r.pickup, r.drop);

@@ -4,10 +4,10 @@ const createDriver = async (data) => {
   const { name, phone, license_number } = data;
 
   const result = await pool.query(
-    `INSERT INTO drivers (name, phone, license_number)
-     VALUES ($1,$2,$3)
+    `INSERT INTO drivers (name, phone, license_number, verification_status)
+     VALUES ($1,$2,$3,$4)
      RETURNING *`,
-    [name, phone, license_number]
+    [name, phone, license_number, 'verified']
   );
 
   return result.rows[0];

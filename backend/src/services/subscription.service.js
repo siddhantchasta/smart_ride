@@ -6,23 +6,29 @@ const createSubscription = async (data) => {
   // CHECK existing active subscription
   const existing = await pool.query(
     `SELECT * FROM subscriptions 
-     WHERE user_id = $1 AND status = 'ACTIVE'`,
+     WHERE user_id = $1 AND status IN ('ACTIVE','WAITING','PENDING')`,
     [user_id]
   );
 
   if (existing.rows.length > 0) {
-    throw new Error("User already has an active subscription");
+    return {
+      alreadyExists: true,
+      subscription: existing.rows[0]
+    };
   }
 
   const result = await pool.query(
     `INSERT INTO subscriptions 
      (user_id, route_id, plan_id, start_date, end_date, status, start_time, end_time)
-     VALUES ($1,$2,$3,$4,$5,'WAITING',$6,$7)
+     VALUES ($1,$2,$3,$4,$5,'PENDING',$6,$7)
     RETURNING *`,
     [user_id, route_id, plan_id, start_date, end_date, start_time, end_time]
   );
 
-  return result.rows[0];
+  return {
+    alreadyExists: false,
+    subscription: result.rows[0]
+  };
 };
 
 const getUserSubscriptions = async (user_id) => {
@@ -98,7 +104,7 @@ const assignDriver = async (subscription_id) => {
     });
 
   } else {
-    // No driver → WAITING
+    // No driver : WAITING
     await pool.query(
       `
       UPDATE subscriptions
@@ -139,7 +145,7 @@ const getUserSubscriptionDetails = async (user_id) => {
     LEFT JOIN drivers d ON s.driver_id = d.id
     LEFT JOIN vehicles v ON v.driver_id = d.id
 
-    WHERE s.user_id = $1 AND s.status IN ('ACTIVE','WAITING')
+    WHERE s.user_id = $1 AND s.status IN ('ACTIVE','WAITING','PENDING')
     `,
     [user_id]
   );

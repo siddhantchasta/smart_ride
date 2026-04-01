@@ -1,6 +1,8 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 export default function AdminNavbar({ currentDate }) {
+  const router = useRouter();
   return (
     <nav className="relative px-5 py-5 sm:px-7 lg:px-8 lg:py-6">
       <div
@@ -15,6 +17,15 @@ export default function AdminNavbar({ currentDate }) {
         </div>
 
         <div className="text-xs text-white/38">{currentDate}</div>
+        <button
+            onClick={() => {
+              localStorage.clear();
+              router.push("/login");
+            }}
+            className="px-5 py-2 rounded-md bg-white text-black text-sm font-medium hover:bg-white/90 transition"
+          >
+            Sign out
+          </button>
       </div>
     </nav>
   );

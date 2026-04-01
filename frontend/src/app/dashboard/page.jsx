@@ -92,6 +92,10 @@ export default function Dashboard() {
         const subRes = await getSubscriptionDetails(userId);
 
         if (subRes.data && subRes.data.subscription_id) {
+          if (subRes.data.status === "PENDING") {
+            router.push(`/payments?subscription_id=${subRes.data.subscription_id}`);
+            return;
+          }
           setSubscription(subRes.data);
         } else {
           if (locRes.data.route_id) {

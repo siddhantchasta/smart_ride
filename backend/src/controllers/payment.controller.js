@@ -19,7 +19,7 @@ const createPaymentOrder = async (req, res) => {
       return res.status(404).json({ error: "Subscription not found" });
     }
 
-    const amount = subscription.price * 100; // 🔥 paise
+    const amount = subscription.price * 100; // paise
     console.log("PRICE:", subscription.price);
     console.log("FINAL AMOUNT:", subscription.price * 100);
     const order = await createOrder(amount);
@@ -31,15 +31,6 @@ const createPaymentOrder = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-// const addPayment = async (req, res) => {
-//   try {
-//     const data = await createPayment(req.body);
-//     res.status(201).json(data);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 const fetchPayments = async (req, res) => {
   try {
@@ -75,7 +66,7 @@ const verifyPaymentController = async (req, res) => {
 
     console.log("REQ BODY:", req.body);
 
-    // 🔐 Verify signature
+    // Verify signature
     const isValid = verifyPayment(
       razorpay_order_id,
       razorpay_payment_id,
@@ -91,7 +82,7 @@ const verifyPaymentController = async (req, res) => {
       return res.status(400).json({ error: "Invalid payment" });
     }
 
-    // 🔥 FETCH FROM DB USING SQL (NOT ORM)
+    // FETCH FROM DB USING SQL (NOT ORM)
     const subscription = await getSubscriptionWithPlan(subscription_id);
 
     if (!subscription) {
@@ -100,7 +91,7 @@ const verifyPaymentController = async (req, res) => {
 
     const amount = subscription.price;
 
-    // 💾 Save payment
+    // Save payment
     const payment = await savePayment({
       user_id,
       subscription_id,
@@ -108,14 +99,14 @@ const verifyPaymentController = async (req, res) => {
       payment_id: razorpay_payment_id,
     });
 
-    // 🔔 Notify
+    // Notify
     await sendNotification({
       user_id,
       message: `Payment successful for ₹${amount}`,
       type: "PAYMENT",
     });
 
-    // 🚗 Assign driver
+    // Assign driver
     await assignDriver(subscription_id);
 
     res.json({
