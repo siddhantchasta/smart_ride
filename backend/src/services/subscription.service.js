@@ -80,8 +80,6 @@ const assignDriver = async (subscription_id) => {
     [route_id]
   );
 
-  console.log("DRIVER FOUND:", driver.rows);
-
   if (driver.rows.length > 0) {
     const driver_id = driver.rows[0].id;
     const driver_name = driver.rows[0].name;

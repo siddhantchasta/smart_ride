@@ -78,7 +78,7 @@ export default function DashboardHero({
               border: currentStyle.border,
             }}
           >
-            ● {subscription.status}
+            {subscription.status}
           </span>
         </div>
       </div>

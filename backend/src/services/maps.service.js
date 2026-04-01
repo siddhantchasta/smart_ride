@@ -13,8 +13,6 @@ const getCoordinates = async (address) => {
       }
     );
 
-    console.log("GOOGLE RESPONSE:", response.data);
-
     if (response.data.status !== 'OK') {
       throw new Error(response.data.status);
     }
@@ -46,8 +44,6 @@ const calculateDistance = async (origin, destination) => {
         }
       }
     );
-
-    console.log("DISTANCE API RESPONSE:", response.data); 
 
     const data = response.data;
 

@@ -210,7 +210,7 @@ export default function RouteSetupView({
                   }}
                 >
                   <p className="text-xs font-medium" style={{ color: "#b45309" }}>
-                    Route not found. Select from available routes:
+                    Route not found. Select from available routes in Bangalore and Hyderabad:
                   </p>
 
                   <div className="relative">

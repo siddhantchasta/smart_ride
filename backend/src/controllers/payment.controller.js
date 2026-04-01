@@ -20,8 +20,6 @@ const createPaymentOrder = async (req, res) => {
     }
 
     const amount = subscription.price * 100; // paise
-    console.log("PRICE:", subscription.price);
-    console.log("FINAL AMOUNT:", subscription.price * 100);
     const order = await createOrder(amount);
 
     res.json(order);
@@ -64,18 +62,12 @@ const verifyPaymentController = async (req, res) => {
 
     const user_id = req.user.id;
 
-    console.log("REQ BODY:", req.body);
-
     // Verify signature
     const isValid = verifyPayment(
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature
     );
-
-    console.log("ORDER:", razorpay_order_id);
-    console.log("PAYMENT:", razorpay_payment_id);
-    console.log("SIGNATURE:", razorpay_signature);
 
     if (!isValid) {
       await markSubscriptionFailed(subscription_id);
