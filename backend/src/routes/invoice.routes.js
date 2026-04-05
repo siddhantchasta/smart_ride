@@ -3,6 +3,6 @@ const router = express.Router();
 
 const { getInvoiceHTML } = require("../controllers/invoice.controller");
 
-router.get("/invoice/:id", getInvoiceHTML);
+router.get("/:id", getInvoiceHTML);
 
 module.exports = router;

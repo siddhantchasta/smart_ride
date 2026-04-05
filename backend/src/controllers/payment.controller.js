@@ -1,6 +1,10 @@
 const { getPayments, getInvoices } = require('../services/payment.service');
 const { createOrder } = require('../services/payment.service');
-const { verifyPayment, savePayment } = require('../services/payment.service');
+const {
+  verifyPayment,
+  savePayment,
+  sendPaymentSuccessEmail,
+} = require('../services/payment.service');
 const { assignDriver, markSubscriptionFailed } = require('../services/subscription.service');
 const { sendNotification } = require('../services/notification.service');
 const { getSubscriptionWithPlan } = require("../services/subscription.service");
@@ -74,7 +78,6 @@ const verifyPaymentController = async (req, res) => {
       return res.status(400).json({ error: "Invalid payment" });
     }
 
-    // FETCH FROM DB USING SQL (NOT ORM)
     const subscription = await getSubscriptionWithPlan(subscription_id);
 
     if (!subscription) {
@@ -83,27 +86,37 @@ const verifyPaymentController = async (req, res) => {
 
     const amount = subscription.price;
 
-    // Save payment
-    const payment = await savePayment({
+    const { payment, user, invoiceUrl } = await savePayment({
       user_id,
       subscription_id,
       amount,
       payment_id: razorpay_payment_id,
     });
 
-    // Notify
-    await sendNotification({
-      user_id,
-      message: `Payment successful for ₹${amount}`,
-      type: "PAYMENT",
-    });
-
-    // Assign driver
     await assignDriver(subscription_id);
 
     res.json({
       message: "Payment successful & subscription activated",
       payment,
+    });
+
+    Promise.allSettled([
+      sendNotification({
+        user_id,
+        message: `Payment successful for ₹${amount}`,
+        type: "PAYMENT",
+      }),
+      sendPaymentSuccessEmail({
+        user,
+        amount,
+        invoiceUrl,
+      }),
+    ]).then((results) => {
+      results.forEach((result) => {
+        if (result.status === "rejected") {
+          console.error("POST PAYMENT TASK ERROR:", result.reason);
+        }
+      });
     });
 
   } catch (error) {

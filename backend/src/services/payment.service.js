@@ -50,7 +50,7 @@ const verifyPayment = (order_id, payment_id, signature) => {
 };
 
 const savePayment = async (data) => {
-  const { user_id, subscription_id, amount, payment_id, invoice_id } = data;
+  const { user_id, subscription_id, amount, payment_id } = data;
 
   // save payment
   const paymentResult = await pool.query(
@@ -77,7 +77,7 @@ const savePayment = async (data) => {
   );
 
   const invoice = invoiceResult.rows[0];
-  const invoiceUrl = `${baseUrl}/invoice/${invoice.id}`;
+  const invoiceUrl = `${baseUrl}/api/invoice/${invoice.id}`;
 
   // fetch user details
   const userResult = await pool.query(
@@ -87,10 +87,25 @@ const savePayment = async (data) => {
 
   const user = userResult.rows[0];
 
-  // send email
-  await sendPaymentEmail(user.email, user.name, amount, invoiceUrl);
-
-  return payment;
+  return {
+    payment,
+    invoice,
+    invoiceUrl,
+    user,
+  };
 };
 
-module.exports = { getPayments, getInvoices, createOrder, verifyPayment, savePayment};
+const sendPaymentSuccessEmail = async ({ user, amount, invoiceUrl }) => {
+  if (!user?.email) return;
+
+  await sendPaymentEmail(user.email, user.name, amount, invoiceUrl);
+};
+
+module.exports = {
+  getPayments,
+  getInvoices,
+  createOrder,
+  verifyPayment,
+  savePayment,
+  sendPaymentSuccessEmail,
+};
