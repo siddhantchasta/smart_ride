@@ -1,25 +1,24 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-const createTransporter = () => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    throw new Error('Missing EMAIL_USER or EMAIL_PASS configuration');
+const getSender = () => {
+  const apiKey = process.env.SENDGRID_API_KEY;
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL;
+
+  if (!apiKey || !fromEmail) {
+    throw new Error('Missing SENDGRID_API_KEY or SENDGRID_FROM_EMAIL configuration');
   }
 
-  return nodemailer.createTransport({
-    service: 'gmail',
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  sgMail.setApiKey(apiKey);
+
+  return {
+    email: fromEmail,
+    name: process.env.SENDGRID_FROM_NAME || 'Smart Ride'
+  };
 };
 
 const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
   try {
-    const transporter = createTransporter();
+    const from = getSender();
     const html = `
        <div style="font-family: Arial, sans-serif; background:#f4f6f8; padding:20px;">
             <div style="max-width:500px; margin:auto; background:white; border-radius:10px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
@@ -64,8 +63,8 @@ const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
             </div>
         </div>`;
 
-    const info = await transporter.sendMail({
-      from: `"Smart Ride" <${process.env.EMAIL_USER}>`,
+    const [info] = await sgMail.send({
+      from,
       to,
       subject: "Payment Successful",
       html
