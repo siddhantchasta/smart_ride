@@ -95,12 +95,7 @@ const verifyPaymentController = async (req, res) => {
 
     await assignDriver(subscription_id);
 
-    res.json({
-      message: "Payment successful & subscription activated",
-      payment,
-    });
-
-    Promise.allSettled([
+    const postPaymentResults = await Promise.allSettled([
       sendNotification({
         user_id,
         message: `Payment successful for ₹${amount}`,
@@ -111,12 +106,17 @@ const verifyPaymentController = async (req, res) => {
         amount,
         invoiceUrl,
       }),
-    ]).then((results) => {
-      results.forEach((result) => {
-        if (result.status === "rejected") {
-          console.error("POST PAYMENT TASK ERROR:", result.reason);
-        }
-      });
+    ]);
+
+    postPaymentResults.forEach((result) => {
+      if (result.status === "rejected") {
+        console.error("POST PAYMENT TASK ERROR:", result.reason);
+      }
+    });
+
+    res.json({
+      message: "Payment successful & subscription activated",
+      payment,
     });
 
   } catch (error) {

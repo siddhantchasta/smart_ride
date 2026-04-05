@@ -1,23 +1,26 @@
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+const createTransporter = () => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error('Missing EMAIL_USER or EMAIL_PASS configuration');
   }
-});
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+};
 
 const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject: "Payment Successful",
-      html : `
+    const transporter = createTransporter();
+    const html = `
        <div style="font-family: Arial, sans-serif; background:#f4f6f8; padding:20px;">
             <div style="max-width:500px; margin:auto; background:white; border-radius:10px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
                 
@@ -35,6 +38,7 @@ const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
                     <p style="margin:0;"><b>Status:</b> Successful</p>
                 </div>
 
+                ${invoiceUrl ? `
                 <div style="text-align:center; margin-top:20px;">
                   <a href="${invoiceUrl}" 
                     style="
@@ -48,20 +52,29 @@ const sendPaymentEmail = async (to, name, amount, invoiceUrl) => {
                     ">
                     Download Invoice
                   </a>
-                </div>
+                </div>` : ''}
 
-                <p>Your subscription is now active. 🎉</p>
+                <p>Your subscription is now active.</p>
 
                 <p style="margin-top:20px;">If you have any questions, feel free to reach out.</p>
 
-                <p style="margin-top:20px;">– SmartRide Team 🚗</p>
+                <p style="margin-top:20px;">- SmartRide Team</p>
                 </div>
 
             </div>
-        </div>`
+        </div>`;
+
+    const info = await transporter.sendMail({
+      from: `"Smart Ride" <${process.env.EMAIL_USER}>`,
+      to,
+      subject: "Payment Successful",
+      html
     });
+
+    return info;
   } catch (err) {
-    console.error("EMAIL ERROR:", err.message);
+    console.error("EMAIL ERROR:", err);
+    throw err;
   }
 };
 

@@ -63,7 +63,7 @@ const savePayment = async (data) => {
 
   const payment = paymentResult.rows[0];
 
-  const baseUrl = process.env.BASE_URL;
+  const baseUrl = process.env.BASE_URL?.replace(/\/$/, '');
 
   const invoiceResult = await pool.query(
     `INSERT INTO invoices (user_id, subscription_id, amount)
@@ -77,7 +77,7 @@ const savePayment = async (data) => {
   );
 
   const invoice = invoiceResult.rows[0];
-  const invoiceUrl = `${baseUrl}/api/invoice/${invoice.id}`;
+  const invoiceUrl = baseUrl ? `${baseUrl}/api/invoice/${invoice.id}` : null;
 
   // fetch user details
   const userResult = await pool.query(
