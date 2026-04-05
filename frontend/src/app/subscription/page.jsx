@@ -61,25 +61,27 @@ export default function SubscriptionPage() {
       });
       const sub = res.data.subscription;
 
-      if (res.data.alreadyExists) {
+      if (!res.data.alreadyExists) {
+        router.push(`/payments?subscription_id=${sub.id}`);
+        return;
+      }
+      
+      if (sub.status === "PENDING") {
+        toast("Payment pending!");
+        router.push(`/payments?subscription_id=${sub.id}`);
+        return;
+      }
 
-        if (sub.status === "PENDING") {
-          toast("Payment pending!");
-          router.push(`/payments?subscription_id=${sub.id}`);
-          return;
-        }
+      if (sub.status === "WAITING") {
+        toast("You have already subscribed, driver will be assigned soon.");
+        router.push("/dashboard");
+        return;
+      }
 
-        if (sub.status === "WAITING") {
-          toast("You have already subscribed, driver will be assigned soon.");
-          router.push("/dashboard");
-          return;
-        }
-
-        if (sub.status === "ACTIVE") {
-          toast("You already have an active subscription.");
-          router.push("/dashboard");
-          return;
-        }
+      if (sub.status === "ACTIVE") {
+        toast("You already have an active subscription.");
+        router.push("/dashboard");
+        return;
       }
     } catch (err) {
       toast.error(err.response?.data?.error || "Failed to subscribe");

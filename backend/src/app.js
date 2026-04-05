@@ -16,12 +16,18 @@ const invoiceRoutes = require("./routes/invoice.routes");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3001", 
+    "https://smart-ride-ten.vercel.app" 
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use("/", invoiceRoutes);
+// app.use("/", invoiceRoutes);
 app.use('/api/routes', routesRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/driver-routes', driverRouteRoutes);
