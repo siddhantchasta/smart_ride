@@ -30,3 +30,6 @@ coverage/
 # IDE
 .vscode/
 .idea/
+
+#Detailed Project Documentation
+smart_ride_project_doc.html
